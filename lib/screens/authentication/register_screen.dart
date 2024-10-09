@@ -3,6 +3,8 @@ import 'package:upalerts/appAssets/assets.dart';
 import 'package:upalerts/res/res.dart';
 import 'package:upalerts/routes/routes.dart';
 import 'package:upalerts/screens/authentication/authenticationWidgets/register_success_modal_sheet.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import '../../firebase_auth/auth.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -15,9 +17,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-  final TextEditingController _confirmPasswordController = TextEditingController();
+  final TextEditingController _confirmPasswordController =
+      TextEditingController();
   bool _obscurePassword = true;
   bool _obscureConfirmPassword = true;
+  String? errorMessage = '';
 
   @override
   void dispose() {
@@ -61,39 +65,77 @@ class _RegisterScreenState extends State<RegisterScreen> {
     return null;
   }
 
-  void _register() {
+  // Function to handle registration
+  Future<void> _register() async {
+    print("Registerrrr");
     if (_formKey.currentState?.validate() ?? false) {
-       showModalBottomSheet(context: context, builder: (context) => const RegisterSuccessModalSheet());
-    }
-         
+      try {
+        // Create user with email and password
+        await createUserWithEmailAndPassword();
 
+        // Show success modal sheet if registration is successful
+        if (mounted) {
+          showModalBottomSheet(
+              context: context,
+              builder: (context) => const RegisterSuccessModalSheet());
+        }
+      } on FirebaseAuthException catch (e) {
+        // Show an error dialog if registration fails
+        _showErrorDialog(e.message ?? 'Registration failed. Please try again.');
+      }
+    }
   }
 
-  @override
+  // Show error dialog
+  void _showErrorDialog(String message) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Error'),
+        content: Text(message),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('OK'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // Firebase registration function
+Future<void> createUserWithEmailAndPassword() async {
+  print("Attempting to register user...");
+  await Auth().createUserWithEmailAndPassword(
+      email: _emailController.text, password: _passwordController.text);
+  print("User registered successfully");
+}
+
+ @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: SafeArea(
         child: Padding(
-          padding:  EdgeInsets.symmetric(horizontal: 20,vertical:getHeight()*0.002),
+          padding: EdgeInsets.symmetric(
+              horizontal: 20, vertical: getHeight() * 0.002),
           child: Form(
             key: _formKey,
             child: Column(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-               
                 // Logo or icon
                 Center(
-                  child: Image.asset(Assets.companyLogo, height: getHeight() * 0.035),
+                  child: Image.asset(Assets.companyLogo,
+                      height: getHeight() * 0.035),
                 ),
-                
+
                 const SizedBox(height: 20),
 
                 // Title
                 const Center(
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
-                    
                     children: [
                       Text(
                         'Welcome Back 👋',
@@ -105,9 +147,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     ],
                   ),
                 ),
-                
+
                 const SizedBox(height: 5),
-                
+
                 // Subtitle
                 const Center(
                   child: Text(
@@ -118,7 +160,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     ),
                   ),
                 ),
-                
+
                 const SizedBox(height: 40),
 
                 // Email field
@@ -156,7 +198,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     prefixIcon: const Icon(Icons.lock_outline),
                     suffixIcon: IconButton(
                       icon: Icon(
-                        _obscurePassword ? Icons.visibility_off : Icons.visibility,
+                        _obscurePassword
+                            ? Icons.visibility_off
+                            : Icons.visibility,
                       ),
                       onPressed: () {
                         setState(() {
@@ -192,7 +236,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     prefixIcon: const Icon(Icons.lock_outline),
                     suffixIcon: IconButton(
                       icon: Icon(
-                        _obscureConfirmPassword ? Icons.visibility_off : Icons.visibility,
+                        _obscureConfirmPassword
+                            ? Icons.visibility_off
+                            : Icons.visibility,
                       ),
                       onPressed: () {
                         setState(() {
@@ -263,8 +309,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       onPressed: () {},
                       style: ElevatedButton.styleFrom(
                         padding: EdgeInsets.symmetric(
-                            horizontal: getWidth() * 0.02, vertical: getHeight() * 0.005),
-                        side: const BorderSide(color: Color.fromARGB(255, 234, 234, 234)),
+                            horizontal: getWidth() * 0.02,
+                            vertical: getHeight() * 0.005),
+                        side: const BorderSide(
+                            color: Color.fromARGB(255, 234, 234, 234)),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(10),
                         ),
@@ -283,8 +331,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       onPressed: () {},
                       style: ElevatedButton.styleFrom(
                         padding: EdgeInsets.symmetric(
-                            horizontal: getWidth() * 0.02, vertical: getHeight() * 0.005),
-                        side: const BorderSide(color: Color.fromARGB(255, 234, 234, 234)),
+                            horizontal: getWidth() * 0.02,
+                            vertical: getHeight() * 0.005),
+                        side: const BorderSide(
+                            color: Color.fromARGB(255, 234, 234, 234)),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(10),
                         ),
@@ -302,31 +352,31 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   ],
                 ),
 
-              SizedBox(height:getHeight()*0.01),
-                
-              // Already have an account text
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Text(
-                    "Already have an account? ",
-                    style: TextStyle(color: Colors.grey),
-                  ),
-                  GestureDetector(
-                    onTap: () {
-                      // Navigate to login
-                      router.go(Routes.onLoginRoute);
-                    },
-                    child: const Text(
-                      'Log In',
-                      style: TextStyle(
-                        color: Colors.green,
-                        fontWeight: FontWeight.bold,
+                SizedBox(height: getHeight() * 0.01),
+
+                // Already have an account text
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Text(
+                      "Already have an account? ",
+                      style: TextStyle(color: Colors.grey),
+                    ),
+                    GestureDetector(
+                      onTap: () {
+                        // Navigate to login
+                        router.go(Routes.onLoginRoute);
+                      },
+                      child: const Text(
+                        'Log In',
+                        style: TextStyle(
+                          color: Colors.green,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ),
-                  ),
-                ],
-              ),
+                  ],
+                ),
               ],
             ),
           ),

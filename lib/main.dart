@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:upalerts/providers/portfolio_provider.dart';
 import 'package:upalerts/providers/profile_provider.dart';
-import 'package:upalerts/routes/routes.dart'; // Import your routes file
+import 'package:upalerts/routes/routes.dart';
 import 'package:bot_toast/bot_toast.dart';
-import 'package:provider/provider.dart'; // Import the Provider package
-
-void main() {
+import 'package:provider/provider.dart'; 
+import 'package:firebase_core/firebase_core.dart';
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp();
   runApp(const MyApp());
 }
 
@@ -22,10 +24,10 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(
           create: (_) => ProfileProvider(),
         ),
-      ], // Provide your PortfolioProvider here
+      ], 
       child: MaterialApp.router(
         debugShowCheckedModeBanner: false,
-        builder: BotToastInit(), // Initialize BotToast
+        builder: BotToastInit(), 
         routerConfig: router,
         title: 'UpAlerts',
         theme: ThemeData(

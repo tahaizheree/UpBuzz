@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:upalerts/appAssets/assets.dart';
 import 'package:upalerts/res/res.dart';
 import 'package:upalerts/routes/routes.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
 
@@ -17,14 +19,11 @@ class _LoginScreen extends State<LoginScreen> {
 
   @override
   void dispose() {
-    // Clean up the controllers when the widget is disposed.
     _emailController.dispose();
     _passwordController.dispose();
-   
     super.dispose();
   }
 
-  // Function to validate email
   String? _validateEmail(String? value) {
     if (value == null || value.isEmpty) {
       return 'Email cannot be empty';
@@ -36,7 +35,6 @@ class _LoginScreen extends State<LoginScreen> {
     return null;
   }
 
-  // Function to validate passwords
   String? _validatePassword(String? value) {
     if (value == null || value.isEmpty) {
       return 'Password cannot be empty';
@@ -47,14 +45,44 @@ class _LoginScreen extends State<LoginScreen> {
     return null;
   }
 
-  void _login() {
+  Future<void> _login() async {
     if (_formKey.currentState?.validate() ?? false) {
-       router.go(Routes.onDashboard);
+      try {
+        await FirebaseAuth.instance.signInWithEmailAndPassword(
+          email: _emailController.text.trim(),
+          password: _passwordController.text.trim(),
+        );
+        // Navigate to dashboard on successful login
+        router.go(Routes.onDashboard);
+      } on FirebaseAuthException catch (e) {
+        // Show error dialog on FirebaseAuthException
+        _showErrorDialog(e.message ?? 'An error occurred during login.');
+      } catch (e) {
+        // Show generic error dialog on any other exception
+        _showErrorDialog('An unexpected error occurred. Please try again.');
+      }
     }
-         
-
   }
 
+  void _showErrorDialog(String message) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Login Failed'),
+          content: Text(message),
+          actions: [
+            TextButton(
+              child: const Text('OK'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(

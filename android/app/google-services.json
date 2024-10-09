@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "763405580507",
+    "project_id": "upbuzz-10b4c",
+    "storage_bucket": "upbuzz-10b4c.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:763405580507:android:775eedd9271975e06db4fe",
+        "android_client_info": {
+          "package_name": "com.example.upalerts"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAVNCXDX49Rtg-dzFDKe1zybwf9zviJ_4I"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
